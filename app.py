@@ -29,7 +29,8 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 csrf = CSRFProtect(app)
 
 # Initialize database
-db = SQLAlchemy(app, model_class=Base)
+db = SQLAlchemy(model_class=Base)
+db.init_app(app)
 
 # Create tables
 with app.app_context():

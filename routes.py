@@ -13,11 +13,11 @@ stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 
 # Get domain for Stripe redirects
 def get_domain():
-    if os.environ.get('REPLIT_DEPLOYMENT') != '':
-        return os.environ.get('REPLIT_DEV_DOMAIN')
-    else:
+    if os.environ.get('REPLIT_DEPLOYMENT') == '1':
         domains = os.environ.get('REPLIT_DOMAINS', '')
-        return domains.split(',')[0] if domains else 'localhost:5000'
+        return domains.split(',')[0] if domains else None
+    else:
+        return os.environ.get('REPLIT_DEV_DOMAIN')
 
 # Register the Replit Auth blueprint
 app.register_blueprint(make_replit_blueprint(), url_prefix="/auth")
@@ -167,7 +167,11 @@ def create_checkout_session():
             billing_address_collection='required',
         )
         
-        return redirect(checkout_session.url, code=303)
+        if checkout_session.url:
+            return redirect(checkout_session.url, code=303)
+        else:
+            flash('Payment session creation failed. Please try again.', 'error')
+            return redirect(url_for('pricing'))
         
     except Exception as e:
         logging.error(f"Stripe checkout error: {str(e)}")
